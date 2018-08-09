@@ -1,6 +1,7 @@
 #include<iostream>
 using namespace std;
 #include<stack>
+#include<queue>
 template<class T>
 struct BinaryTreeNode{
 	T data;
@@ -37,22 +38,40 @@ class BinaryTree{
 		_Destroy(_root)	;
 		_root = NULL;
 	}
+	//非递归层序遍历
+	void levelOrder(){
+		queue<Node*> q;
+		q.push(_root);
+		while(!q.empty()){
+			Node* front = q.front();
+			cout<<front->data<<" ";
+			q.pop();
+			if(front->_left)
+			  q.push(front->_left);
+			if(front->_right)
+			  q.push(front->_right);
+		}
+		cout<<endl;
+	}
 	//递归前序
 	void PreOrder_R(){
 		_PreOrder_R(_root);
 	cout<<endl;
 
 	}
+
 	//递归中序
 	void MidOrder_R(){
 		_MidOrder_R(_root);
 		cout<<endl;
 	}
+
 	//递归后序
 	void PostOrder_R(){
 		_PostOrder_R(_root);
 		cout<<endl;
 	}
+
 	//非递归前序
 	void PreOrder(){
 		
@@ -70,6 +89,7 @@ class BinaryTree{
 		}
 		cout<<endl;
 	}
+
 	//非递归中序
 	void MidOrder(){
 		Node* cur = _root;
@@ -107,6 +127,61 @@ class BinaryTree{
 			}
 		}
 	}
+	//获得第K层的节点个数
+	size_t GetKNode(){
+		size_t k = 3;
+		size_t size=_GetKNode(_root,k);
+		return size;
+	}
+	//求叶子节点的个数
+	size_t leafNode(){
+		size_t size = 0;
+		_leafNode(_root,size);
+		return size;
+	}
+	//求两个节点的公共祖先
+	Node CommonAncestor(Node* root,Node x1,Node x2){
+		if(root==NULL||x1==NULL||x2==NULL)
+		  return NULL;
+		if(x1==root&&IsNodeInTree(root,x2))
+		  return root;
+		if(x2==root&&IsNodeInTree(root,x1))
+		  return root;
+		bool x1Inleft,x1Inright,x2Inleft,x2Inright;
+		x1Inleft = IsNodeInTree(root->_left,x1);
+		x2Inright = IsNodeInTree(root->_right,x2);
+		if(x1Inleft&&x2Inright)
+		  return root;
+		x2Inleft = IsNodeInTree(root->_left,x2);
+		x1Inright = IsNodeInTree(root->_right,x1);
+		if(x1Inright&&x2Inleft)
+		  return root;
+		if(x1Inleft && x2Inleft)
+		  return CommonAncestor(root->_left,x1,x2);
+		if(x1Inright && x2Inright)
+		  return CommonAncestor(root->_right,x1,x2);
+
+	}
+	size_t  Depth(){
+		return _Depth(_root);	
+	}
+	//求二叉树中两个最远节点的距离
+	void MaxLen(Node* root){
+			if(root==NULL)
+			  return 0;
+			int left = Depth(root->_left);
+			int right = Depth(root->_right);
+			int maxlen = left+right;
+
+			int leftMax = MaxLen(root->_left);
+			int rightMax = MaxLen(root->_right);
+
+			if(leftMax>rightMax)
+			  return leftMax>maxlen?leftMax:maxlen;
+			else
+			  return rightMax>maxlen?rightMax:maxlen;
+	}
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	private:
 	Node* _CreateBinaryTree(T* a,size_t n,const T& invalid,size_t& index)
 	{
@@ -136,6 +211,13 @@ class BinaryTree{
 		delete root;
 	}
 
+	size_t _Depth(Node* root){
+		if(root==NULL)
+		  return 0;
+		int left = _Depth(root->_left);
+		int right = _Depth(root->_right);
+		return left>right?left+1:right+1;
+	}
 	void _PreOrder_R(Node* root){
 		if(root==NULL)
 		  return;
@@ -158,6 +240,30 @@ class BinaryTree{
 		_PreOrder_R(root->_right);
 		cout<<root->data<<endl;
 	}
+	size_t _GetKNode(Node* root,size_t k){
+		if(root==NULL)	
+		  return 0;
+		if(k==1)
+		  return 1;
+		return _GetKNode(root->_left,k-1)+_GetKNode(root->_right,k-1);
+	}
+	void _leafNode(Node* root,size_t& size){
+		if(root==NULL)
+		  return;
+		if(root->_left==NULL&&root->_right==NULL)
+		  size++;
+		_leafNode(root->_left,size);
+		_leafNode(root->_right,size);
+	}
+	bool IsNodeInTree(Node root,Node x){
+		if(root==NULL)	
+		  return false;
+		if(root==x)
+		  return true;
+		if(IsNodeInTree(root->_left))
+		  return true;
+		return 	IsNodeInTree(root->_right);
+	}
 	Node* _root;
 };
 
@@ -169,9 +275,13 @@ int main()
 //	bt.PreOrder_R();
 //	bt.MidOrder_R();
 //	bt.PostOrder_R();
-	bt.PreOrder();
-	bt.MidOrder();
-	bt.PostOrder();
+	//bt.PreOrder();
+	//bt.MidOrder();
+	//bt.PostOrder();
+	//bt.levelOrder();
+	//cout<<bt.GetKNode()<<endl;
+	//cout<<bt.leafNode()<<endl;
+	cout<<bt.Depth()<<endl;
 	return 0;
 }
 
